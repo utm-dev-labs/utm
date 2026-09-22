@@ -1,0 +1,79 @@
+# =============================================================================
+# Deploy a Staging — UTM Dev Labs
+# Se ejecuta automáticamente cuando se mergea código a la rama staging.
+# =============================================================================
+
+name: Deploy Staging
+
+on:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build para Staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Subir artefactos para el job de deploy
+      - name: Subir artefactos de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-staging
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    name: Deploy a Staging
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Descargar artefactos de build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-staging
+          path: dist/
+
+      # --- PLACEHOLDER: Reemplazar con el comando real de deploy ---
+      - name: Deploy a staging
+        run: |
+          echo "=== PLACEHOLDER: Deploy a staging ==="
+          echo "Reemplazar este paso con el comando real de deploy."
+          echo "Ejemplos: aws s3 sync, vercel deploy, rsync, docker push, etc."
+
+  notify:
+    name: Notificación
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      # --- PLACEHOLDER: Reemplazar con notificación real (Slack, Discord, email) ---
+      - name: Notificar resultado del deploy
+        run: |
+          echo "=== PLACEHOLDER: Notificación ==="
+          echo "Deploy a staging: ${{ needs.deploy.result }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Autor: ${{ github.actor }}"
+          echo "Reemplazar con integración a Slack, Discord, email, etc."

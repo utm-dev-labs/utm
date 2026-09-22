@@ -1,0 +1,54 @@
+# =============================================================================
+# CI Pipeline — UTM Dev Labs
+# Se ejecuta en cada Pull Request hacia dev, staging y main.
+# Valida código: lint, tests y build.
+# =============================================================================
+
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, staging, main]
+
+# Cancela ejecuciones previas del mismo PR para ahorrar minutos
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+
+    # --- Estrategia de versiones (ajustar según el proyecto) ---
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      # 1. Checkout del código
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      # 2. Configurar Node.js (cambiar a otro runtime si es necesario)
+      - name: Configurar Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      # 3. Instalar dependencias
+      - name: Instalar dependencias
+        run: npm ci
+
+      # 4. Ejecutar linter
+      - name: Lint
+        run: npm run lint
+
+      # 5. Ejecutar tests
+      - name: Tests
+        run: npm test
+
+      # 6. Verificar que el proyecto compila correctamente
+      - name: Build
+        run: npm run build

@@ -1,0 +1,78 @@
+Eres un asistente de desarrollo para el proyecto UTM Dev Labs. Sigue estas reglas estrictamente.
+
+## Proyecto
+UTM Dev Labs — repositorio central de desarrollo del equipo UTM. Stack: TypeScript/Node.js, Supabase (PostgreSQL), Docker.
+
+## Idioma
+- Código (variables, funciones, tipos): inglés
+- Documentación, commits, PRs, comentarios de negocio: español
+
+## Naming
+- Variables/funciones: camelCase
+- Componentes/tipos: PascalCase
+- Constantes: UPPER_SNAKE_CASE
+- Archivos: kebab-case (ej: user-profile.tsx)
+
+## Código
+- Preferir arrow functions
+- Preferir `interface` sobre `type`
+- Named exports, evitar default exports
+- Imports con alias `@/` desde src/
+- Siempre tipar funciones y parámetros — evitar `any`
+
+## Estructura
+```
+src/app/           → rutas y páginas
+src/components/    → componentes reutilizables
+src/lib/           → utilidades
+src/services/      → lógica de negocio
+src/types/         → tipos e interfaces
+src/hooks/         → hooks personalizados
+src/tests/         → tests
+supabase/migrations/ → migraciones SQL
+supabase/functions/  → edge functions
+```
+
+## Branching
+Flujo: feat/* → dev → staging → main
+- main = producción
+- staging = pre-producción / QA
+- dev = desarrollo activo
+
+## Commits
+Conventional commits en español:
+```
+<tipo>(<alcance>): <descripción>
+```
+Tipos: feat, fix, docs, style, refactor, test, chore, perf, ci, build
+
+## Migraciones
+- NUNCA modificar migraciones existentes
+- Crear nuevas migraciones con timestamp: YYYYMMDDHHMMSS_descripcion.sql
+- Incluir UP y DOWN
+- Probar en local antes de staging/producción
+
+## Testing
+- Todo código nuevo debe tener tests
+- Tests junto al código: archivo.ts → archivo.test.ts
+- Coverage objetivo: 80%
+
+## Seguridad
+- NUNCA incluir secretos, tokens o API keys en el código
+- Variables de entorno en .env (está en .gitignore)
+- Validar inputs del usuario
+- Queries parametrizadas, nunca concatenar SQL
+
+## PRs
+- Descripción clara del cambio
+- Link a issue si aplica
+- Tests incluidos
+- Lint y build pasando
+
+## Al generar código
+1. Seguir las convenciones de este archivo — no inventar nuevas
+2. Respetar la estructura de archivos existente
+3. No agregar dependencias sin justificación
+4. No crear arquitectura nueva sin discutirlo
+5. Ejecutar lint y tests mentalmente antes de sugerir código
+6. Pedir confirmación antes de migraciones o cambios de lógica de negocio

@@ -1,0 +1,100 @@
+# =============================================================================
+# Deploy a Producción — UTM Dev Labs
+# Se ejecuta cuando se mergea código a main.
+# Incluye creación automática de GitHub Release con tag semver.
+# =============================================================================
+
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # No cancelar deploys a producción en progreso
+
+jobs:
+  build:
+    name: Build para Producción
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para generar tags
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Subir artefactos de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-production
+          path: dist/
+          retention-days: 30
+
+  deploy:
+    name: Deploy a Producción
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Descargar artefactos de build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-production
+          path: dist/
+
+      # --- PLACEHOLDER: Reemplazar con el comando real de deploy ---
+      - name: Deploy a producción
+        run: |
+          echo "=== PLACEHOLDER: Deploy a producción ==="
+          echo "Reemplazar este paso con el comando real de deploy."
+          echo "Ejemplos: aws s3 sync, vercel deploy --prod, kubectl apply, etc."
+
+  release:
+    name: Crear GitHub Release
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Generar versión semver basada en la fecha y número de ejecución
+      - name: Generar tag de versión
+        id: version
+        run: |
+          VERSION="v$(date +'%Y.%m.%d')-${{ github.run_number }}"
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Versión generada: $VERSION"
+
+      - name: Crear tag
+        run: |
+          git tag ${{ steps.version.outputs.tag }}
+          git push origin ${{ steps.version.outputs.tag }}
+
+      - name: Crear GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
