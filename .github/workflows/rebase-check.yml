@@ -1,0 +1,85 @@
+# =============================================================================
+# Rebase Check — UTM Dev Labs
+# Verifica que la rama del PR esté rebaseada sobre dev (sin merge commits).
+# =============================================================================
+
+name: Rebase Check
+
+on:
+  pull_request:
+    branches: [dev, staging, main]
+
+jobs:
+  rebase-check:
+    name: Verificar Rebase
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar que no hay merge commits innecesarios
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          BASE_BRANCH="origin/${{ github.base_ref }}"
+          HEAD_BRANCH="HEAD"
+
+          echo "📋 Verificando merge commits en PR #$PR_NUMBER..."
+          echo "   Base: ${{ github.base_ref }}"
+          echo "   Head: ${{ github.head_ref }}"
+          echo ""
+
+          # Buscar merge commits en el rango del PR
+          MERGE_COMMITS=$(git log --merges --oneline "$BASE_BRANCH".."$HEAD_BRANCH" || true)
+
+          if [ -n "$MERGE_COMMITS" ]; then
+            echo "⚠️  Se detectaron merge commits en esta rama:"
+            echo "$MERGE_COMMITS" | sed 's/^/   • /'
+            echo ""
+
+            # Poner comentario amigable en el PR
+            COMMENT_BODY="## ⚠️ Merge commits detectados
+
+          ¡Hola! Se detectaron **merge commits** en tu rama. Para mantener un historial limpio, te pedimos que hagas **rebase** en lugar de merge.
+
+          ### ¿Cómo hacer rebase?
+
+          \`\`\`bash
+          # 1. Asegúrate de estar en tu rama
+          git checkout ${{ github.head_ref }}
+
+          # 2. Actualiza la rama base
+          git fetch origin ${{ github.base_ref }}
+
+          # 3. Haz rebase sobre la rama base
+          git rebase origin/${{ github.base_ref }}
+
+          # 4. Si hay conflictos, resuélvelos y continúa:
+          #    git add <archivos-resueltos>
+          #    git rebase --continue
+
+          # 5. Push forzado (solo a TU rama, nunca a dev/staging/main)
+          git push --force-with-lease
+          \`\`\`
+
+          ### ¿Por qué rebase en vez de merge?
+          - 📖 **Historial más limpio** — más fácil de leer y entender
+          - 🔍 **Mejor git bisect** — facilita encontrar bugs
+          - 🤝 **Consistencia del equipo** — todos seguimos el mismo flujo
+
+          > 💡 Si tienes dudas, pregunta en el canal del equipo. ¡Estamos para ayudarnos!"
+
+            gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"
+
+            echo "📝 Se agregó un comentario al PR con instrucciones de rebase."
+            echo ""
+            echo "❌ Por favor, haz rebase de tu rama antes de continuar."
+            exit 1
+          fi
+
+          echo "✅ No se detectaron merge commits. ¡La rama está limpia!"

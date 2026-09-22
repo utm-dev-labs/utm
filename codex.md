@@ -78,3 +78,47 @@ Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci`
 3. No agregar dependencias innecesarias
 4. Pedir confirmación antes de migraciones o cambios de lógica de negocio
 5. Verificar que el código compila y los tests pasan
+
+## Reglas de ramas y rebase
+
+- La rama local de trabajo SIEMPRE debe partir de `dev`
+- NUNCA hacer push directo a `main` o `staging`
+- NUNCA hacer merge commits — siempre usar rebase
+- Antes de crear un PR: `git fetch origin dev && git rebase origin/dev`
+- Conflictos en rebase: resolver manualmente commit por commit
+- Antes de pushear: `git pull --rebase origin dev`
+- Flow estricto: crear rama desde dev → trabajar → rebase sobre dev → PR a dev
+
+## Reglas de archivos .md
+
+- NO crear archivos `.md` en la raíz del proyecto sin autorización
+- `.md` permitidos en raíz: `README.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, `codex.md`
+- Documentación nueva va SIEMPRE en `docs/`
+- Si necesitas documentar algo, usa la carpeta apropiada en `docs/`
+
+## Reglas de seguridad reforzadas
+
+- Antes de cada commit, verificar que NO haya:
+  * Secrets, tokens, API keys hardcodeados
+  * Passwords en strings
+  * URLs con credenciales
+  * Archivos `.env` o similares
+- Si se detecta un posible secret, ALERTAR y NO commitear
+- Usar variables de entorno para toda configuración sensible
+
+## Reglas de revisión de código (IA como reviewer)
+
+- Al revisar código, verificar:
+  1. ¿Los tests cubren la lógica de negocio del cambio?
+  2. ¿El código sigue las convenciones del proyecto?
+  3. ¿Hay edge cases no cubiertos?
+  4. ¿Las migraciones tienen UP y DOWN?
+  5. ¿Los inputs del usuario están validados?
+  6. ¿No hay secrets hardcodeados?
+- Si falta test para lógica de negocio nueva, DEBE crearse o pedirse que se cree
+
+## Reglas de negocio
+
+- Antes de implementar lógica de negocio, revisar `docs/business-rules/`
+- Si no existe documentación de la regla, documentarla PRIMERO en `docs/business-rules/` y luego implementar
+- Cambios a reglas de negocio existentes requieren confirmación explícita del usuario

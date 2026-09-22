@@ -1,0 +1,47 @@
+#!/bin/bash
+# =============================================================================
+# Commit-msg hook — UTM Dev Labs
+# Valida que el mensaje de commit siga conventional commits.
+# =============================================================================
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Patrón de conventional commits
+# Tipos válidos: feat, fix, docs, style, refactor, test, chore, perf, ci, build
+PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build)(\(.+\))?: .{3,}"
+
+# Permitir merge commits y rebase
+if echo "$COMMIT_MSG" | grep -qE "^(Merge|Revert|fixup!|squash!)"; then
+  exit 0
+fi
+
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+  echo ""
+  echo "❌ ERROR: El mensaje de commit no sigue el formato de conventional commits."
+  echo ""
+  echo "   Formato correcto:  tipo(alcance): descripción"
+  echo ""
+  echo "   Tipos válidos:"
+  echo "     feat     → nueva funcionalidad"
+  echo "     fix      → corrección de bug"
+  echo "     docs     → cambios en documentación"
+  echo "     style    → formato (espacios, semicolons, etc.)"
+  echo "     refactor → refactorización sin cambio de funcionalidad"
+  echo "     test     → agregar o modificar tests"
+  echo "     chore    → tareas de mantenimiento"
+  echo "     perf     → mejoras de rendimiento"
+  echo "     ci       → cambios en CI/CD"
+  echo "     build    → cambios en build o dependencias"
+  echo ""
+  echo "   Ejemplos:"
+  echo "     feat(auth): agregar login con Google"
+  echo "     fix(api): corregir timeout en endpoint de usuarios"
+  echo "     docs: actualizar guía de onboarding"
+  echo ""
+  echo "   Tu mensaje fue: $COMMIT_MSG"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Mensaje de commit válido."

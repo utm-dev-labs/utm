@@ -1,0 +1,32 @@
+#!/bin/bash
+# =============================================================================
+# Pre-commit hook — UTM Dev Labs
+# Ejecuta lint-staged y escaneo de secrets antes de cada commit.
+# =============================================================================
+
+echo "🔍 Ejecutando validaciones pre-commit..."
+
+# 1. Escanear secrets en archivos staged
+bash "$(dirname "$0")/../scripts/check-secrets.sh"
+if [ $? -ne 0 ]; then
+  echo "❌ Commit bloqueado: se detectaron posibles secrets."
+  echo "   Revisa los archivos marcados y elimina credenciales hardcodeadas."
+  exit 1
+fi
+
+# 2. Verificar que los .md están en ubicaciones permitidas
+bash "$(dirname "$0")/../scripts/check-md-allowed.sh"
+if [ $? -ne 0 ]; then
+  echo "❌ Commit bloqueado: archivos .md en ubicaciones no permitidas."
+  echo "   Los .md solo van en docs/, o son README.md, CONTRIBUTING.md, CLAUDE.md, AGENTS.md, codex.md"
+  exit 1
+fi
+
+# 3. Ejecutar lint-staged (lint + format en archivos staged)
+npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ Commit bloqueado: errores de lint. Ejecuta 'npm run lint:fix' y vuelve a intentar."
+  exit 1
+fi
+
+echo "✅ Pre-commit: todas las validaciones pasaron."

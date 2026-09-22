@@ -1,0 +1,4 @@
+{
+  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+  "*.md": "scripts/check-md-allowed.sh"
+}

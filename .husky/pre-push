@@ -1,0 +1,61 @@
+#!/bin/bash
+# =============================================================================
+# Pre-push hook — UTM Dev Labs
+# Bloquea push directo a main/staging. Verifica tests y rebase sobre dev.
+# =============================================================================
+
+BRANCH=$(git branch --show-current)
+
+echo "🔍 Ejecutando validaciones pre-push en rama: $BRANCH"
+
+# 1. Bloquear push directo a main o staging
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "staging" ]; then
+  echo ""
+  echo "❌ ERROR: No puedes hacer push directo a '$BRANCH'."
+  echo ""
+  echo "   El flujo correcto es:"
+  echo "   1. Crear una rama desde dev:  git checkout dev && git checkout -b feat/mi-feature"
+  echo "   2. Trabajar en tu rama"
+  echo "   3. Hacer push a tu rama:      git push -u origin feat/mi-feature"
+  echo "   4. Crear un Pull Request en GitHub hacia 'dev'"
+  echo ""
+  exit 1
+fi
+
+# 2. Verificar que la rama está basada en dev (no en main/staging)
+bash "$(dirname "$0")/../scripts/check-branch.sh"
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# 3. Verificar rebase (sin merge commits)
+bash "$(dirname "$0")/../scripts/check-rebase.sh"
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+
+# 4. Verificar que no hay archivos .env staged
+ENV_FILES=$(git diff --cached --name-only | grep -E '^\.(env|env\.local|env\.production|env\.staging)')
+if [ -n "$ENV_FILES" ]; then
+  echo ""
+  echo "❌ ERROR: Estás intentando pushear archivos de entorno:"
+  echo "$ENV_FILES"
+  echo ""
+  echo "   Estos archivos contienen secrets y NUNCA deben subirse al repo."
+  echo "   Agrégalos a .gitignore si no están ahí."
+  echo ""
+  exit 1
+fi
+
+# 5. Ejecutar tests
+echo "🧪 Ejecutando tests..."
+npm test 2>/dev/null
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Push bloqueado: los tests no pasan."
+  echo "   Ejecuta 'npm test' para ver los errores y corrígelos antes de pushear."
+  echo ""
+  exit 1
+fi
+
+echo "✅ Pre-push: todas las validaciones pasaron."

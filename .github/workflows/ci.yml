@@ -52,3 +52,232 @@ jobs:
       # 6. Verificar que el proyecto compila correctamente
       - name: Build
         run: npm run build
+
+  # ===========================================================================
+  # Job: Escaneo de seguridad — detecta secrets hardcodeados y .env comiteados
+  # ===========================================================================
+  security:
+    name: Escaneo de Seguridad
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detectar secrets hardcodeados en cambios del PR
+        run: |
+          echo "🔍 Escaneando cambios del PR por secrets hardcodeados..."
+          DIFF_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' '*.yml' '*.yaml' '*.env*' '*.cfg' '*.conf' '*.toml' || true)
+
+          if [ -z "$DIFF_FILES" ]; then
+            echo "✅ No hay archivos relevantes modificados."
+            exit 0
+          fi
+
+          FOUND=0
+          while IFS= read -r file; do
+            [ -f "$file" ] || continue
+            # Buscar patrones sospechosos en asignaciones
+            if grep -nEi '(sk-[a-zA-Z0-9]{20,}|pk_[a-zA-Z0-9]{20,}|AKIA[A-Z0-9]{16}|(password|secret|token)\s*[:=]\s*["\x27][^"\x27]{8,})' "$file"; then
+              echo ""
+              echo "⚠️  POSIBLE SECRET DETECTADO en: $file"
+              echo "   → Revisa las líneas anteriores y usa variables de entorno en su lugar."
+              FOUND=1
+            fi
+          done <<< "$DIFF_FILES"
+
+          if [ "$FOUND" -eq 1 ]; then
+            echo ""
+            echo "❌ ERROR: Se encontraron posibles secrets hardcodeados."
+            echo ""
+            echo "📖 ¿Qué hacer?"
+            echo "   1. Elimina los valores sensibles del código fuente."
+            echo "   2. Usa variables de entorno o un gestor de secrets (ej: GitHub Secrets)."
+            echo "   3. Si es un falso positivo, agrega un comentario '# nosec' en la línea."
+            exit 1
+          fi
+
+          echo "✅ No se encontraron secrets hardcodeados."
+
+      - name: Verificar que no hay archivos .env comiteados
+        run: |
+          echo "🔍 Verificando que no hay archivos .env en el repositorio..."
+          ENV_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '\.env($|\.)' || true)
+
+          if [ -n "$ENV_FILES" ]; then
+            echo "❌ ERROR: Se detectaron archivos .env en los cambios del PR:"
+            echo "$ENV_FILES"
+            echo ""
+            echo "📖 Los archivos .env contienen configuración sensible y NO deben comitearse."
+            echo "   1. Agrega estos archivos a .gitignore"
+            echo "   2. Usa 'git rm --cached <archivo>' para dejar de rastrearlos."
+            echo "   3. Comparte la configuración mediante .env.example (sin valores reales)."
+            exit 1
+          fi
+
+          echo "✅ No hay archivos .env en los cambios."
+
+  # ===========================================================================
+  # Job: Validación de PR — verifica ramas y flujo de trabajo
+  # ===========================================================================
+  validate-pr:
+    name: Validar PR (ramas y flujo)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar nombre de rama y flujo de merge
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          echo "📋 Validando PR: $HEAD_REF → $BASE_REF"
+          echo ""
+
+          # 1. Verificar que la rama sigue la convención de nombres
+          if ! echo "$HEAD_REF" | grep -qE '^(feat|fix|hotfix|docs|chore)/'; then
+            echo "❌ ERROR: La rama '$HEAD_REF' no sigue la convención de nombres."
+            echo ""
+            echo "📖 Las ramas deben empezar con uno de estos prefijos:"
+            echo "   • feat/    → Nueva funcionalidad"
+            echo "   • fix/     → Corrección de bug"
+            echo "   • hotfix/  → Corrección urgente en producción"
+            echo "   • docs/    → Cambios en documentación"
+            echo "   • chore/   → Tareas de mantenimiento"
+            echo ""
+            echo "   Ejemplo: feat/login-con-google, fix/error-en-registro"
+            exit 1
+          fi
+
+          echo "✅ Nombre de rama válido: $HEAD_REF"
+
+          # 2. Verificar flujo correcto de merge
+          BRANCH_TYPE=$(echo "$HEAD_REF" | cut -d'/' -f1)
+
+          case "$BASE_REF" in
+            main)
+              # Solo staging y hotfix/* pueden ir a main
+              if [ "$BRANCH_TYPE" != "hotfix" ] && [ "$HEAD_REF" != "staging" ]; then
+                echo ""
+                echo "❌ ERROR: No se permite hacer PR directo a 'main' desde '$HEAD_REF'."
+                echo ""
+                echo "📖 Flujo correcto:"
+                echo "   • feature/fix/docs/chore branches → dev"
+                echo "   • dev → staging"
+                echo "   • staging → main"
+                echo "   • hotfix/* → main (solo para urgencias)"
+                echo ""
+                echo "   Tu rama debería ir a 'dev', no a 'main'."
+                exit 1
+              fi
+              echo "✅ Flujo válido hacia main."
+              ;;
+            staging)
+              # Solo dev puede ir a staging
+              if [ "$HEAD_REF" != "dev" ]; then
+                echo ""
+                echo "❌ ERROR: Solo la rama 'dev' puede hacer PR a 'staging'."
+                echo "   Tu rama '$HEAD_REF' debería ir a 'dev' primero."
+                exit 1
+              fi
+              echo "✅ Flujo válido hacia staging."
+              ;;
+            dev)
+              # Feature branches van a dev — ya validamos el prefijo arriba
+              echo "✅ Flujo válido hacia dev."
+              ;;
+            *)
+              echo "⚠️  Rama base '$BASE_REF' no reconocida. Se permite el PR."
+              ;;
+          esac
+
+          echo ""
+          echo "🎉 Validación de PR completada exitosamente."
+
+  # ===========================================================================
+  # Job: Verificar tests — advierte si hay cambios en src/ sin tests
+  # ===========================================================================
+  check-tests:
+    name: Verificar Tests (warning)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar que cambios en src/ incluyan tests
+        run: |
+          SRC_CHANGES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/' | grep -v '\.test\.' | grep -v '\.spec\.' || true)
+          TEST_CHANGES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/' | grep -E '\.(test|spec)\.' || true)
+
+          if [ -n "$SRC_CHANGES" ] && [ -z "$TEST_CHANGES" ]; then
+            echo "⚠️  ADVERTENCIA: Se detectaron cambios en src/ pero NO se encontraron tests nuevos o modificados."
+            echo ""
+            echo "Archivos modificados en src/ (sin tests):"
+            echo "$SRC_CHANGES" | sed 's/^/   • /'
+            echo ""
+            echo "📖 Recomendación:"
+            echo "   Considera agregar tests para los archivos que modificaste."
+            echo "   Los tests ayudan a prevenir regresiones y documentan el comportamiento esperado."
+            echo ""
+            echo "   Esto es solo una advertencia — el PR puede continuar."
+            # No hacemos exit 1 para que sea warning, no blocker
+          elif [ -n "$SRC_CHANGES" ]; then
+            echo "✅ Se detectaron cambios en src/ y también hay tests modificados/agregados."
+          else
+            echo "✅ No hay cambios en src/ — no se requieren tests adicionales."
+          fi
+
+  # ===========================================================================
+  # Job: Verificar archivos .md — solo permitidos en ubicaciones específicas
+  # ===========================================================================
+  check-md-files:
+    name: Verificar archivos Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar ubicación de archivos .md
+        run: |
+          # Obtener archivos .md modificados
+          MD_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- '*.md' || true)
+
+          if [ -z "$MD_FILES" ]; then
+            echo "✅ No hay archivos .md modificados."
+            exit 0
+          fi
+
+          INVALID_FILES=""
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            # Permitir: docs/**, README.md, CONTRIBUTING.md, CLAUDE.md, AGENTS.md, codex.md
+            if echo "$file" | grep -qE '^docs/'; then
+              continue
+            fi
+            BASENAME=$(basename "$file")
+            if echo "$BASENAME" | grep -qE '^(README\.md|CONTRIBUTING\.md|CLAUDE\.md|AGENTS\.md|codex\.md)$'; then
+              continue
+            fi
+            INVALID_FILES="$INVALID_FILES\n   • $file"
+          done <<< "$MD_FILES"
+
+          if [ -n "$INVALID_FILES" ]; then
+            echo "❌ ERROR: Se encontraron archivos .md en ubicaciones no permitidas:"
+            echo -e "$INVALID_FILES"
+            echo ""
+            echo "📖 Los archivos Markdown solo están permitidos en:"
+            echo "   • docs/           → Documentación del proyecto"
+            echo "   • README.md       → Descripción del repositorio"
+            echo "   • CONTRIBUTING.md → Guía de contribución"
+            echo "   • CLAUDE.md       → Instrucciones para Claude"
+            echo "   • AGENTS.md       → Configuración de agentes"
+            echo "   • codex.md        → Configuración de Codex"
+            echo ""
+            echo "   Mueve tus archivos .md a la carpeta docs/ o usa un formato diferente."
+            exit 1
+          fi
+
+          echo "✅ Todos los archivos .md están en ubicaciones permitidas."

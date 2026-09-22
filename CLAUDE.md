@@ -134,3 +134,47 @@ Toda PR debe incluir:
 5. Ejecutar lint y tests antes de declarar tarea completada
 6. Pedir confirmación antes de migraciones o cambios de lógica de negocio
 7. No agregar dependencias sin justificación
+
+## Reglas de ramas y rebase
+
+- La rama local de trabajo SIEMPRE debe partir de `dev`
+- NUNCA hacer push directo a `main` o `staging`
+- NUNCA hacer merge commits — siempre usar rebase
+- Antes de crear un PR, hacer `git fetch origin dev && git rebase origin/dev`
+- Si hay conflictos en rebase, resolverlos manualmente commit por commit
+- Comando de rebase: `git pull --rebase origin dev` antes de pushear
+- Flow estricto: crear rama desde dev → trabajar → rebase sobre dev → PR a dev
+
+## Reglas de archivos .md
+
+- NO crear archivos `.md` en la raíz del proyecto sin autorización
+- Los `.md` permitidos en raíz son: `README.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, `codex.md`
+- Documentación nueva va SIEMPRE en `docs/`
+- Si necesitas documentar algo, usa la carpeta apropiada en `docs/`
+
+## Reglas de seguridad reforzadas
+
+- Antes de cada commit, la IA debe revisar que NO haya:
+  * Secrets, tokens, API keys hardcodeados
+  * Passwords en strings
+  * URLs con credenciales
+  * Archivos `.env` o similares
+- Si la IA detecta un posible secret, DEBE alertar y NO commitear
+- Usar variables de entorno para toda configuración sensible
+
+## Reglas de revisión de código (para la IA como reviewer)
+
+- Al revisar código, verificar:
+  1. ¿Los tests cubren la lógica de negocio del cambio?
+  2. ¿El código sigue las convenciones del proyecto?
+  3. ¿Hay edge cases no cubiertos?
+  4. ¿Las migraciones tienen UP y DOWN?
+  5. ¿Los inputs del usuario están validados?
+  6. ¿No hay secrets hardcodeados?
+- Si falta algún test para lógica de negocio nueva, la IA DEBE crear el test o pedir que se cree
+
+## Reglas de negocio
+
+- Antes de implementar lógica de negocio, revisar `docs/business-rules/`
+- Si no existe documentación de la regla, documentarla PRIMERO en `docs/business-rules/` y luego implementar
+- Cambios a reglas de negocio existentes requieren confirmación explícita del usuario

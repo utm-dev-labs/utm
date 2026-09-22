@@ -1,0 +1,31 @@
+{
+  "name": "@utm-dev-labs/utm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UTM Dev Labs — Plataforma de desarrollo colaborativo",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:migrate": "supabase db push",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
+    "eslint": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "prettier": "^3.3.0",
+    "vitest": "^2.0.0",
+    "typescript": "^5.5.0",
+    "tsx": "^4.16.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

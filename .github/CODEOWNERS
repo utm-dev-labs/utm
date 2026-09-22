@@ -1,0 +1,23 @@
+# =============================================================================
+# CODEOWNERS — UTM Dev Labs
+# Define quién debe aprobar cambios en cada área del proyecto.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# =============================================================================
+
+# Documentación
+docs/                           @utm-dev-labs/docs-team
+
+# CI/CD y configuración de workflows
+.github/workflows/              @utm-dev-labs/devops
+
+# Migraciones de base de datos
+supabase/migrations/            @utm-dev-labs/db-admin
+
+# Configuración de agentes AI
+CLAUDE.md                       @utm-dev-labs/ai-leads
+AGENTS.md                       @utm-dev-labs/ai-leads
+.cursorrules                    @utm-dev-labs/ai-leads
+codex.md                        @utm-dev-labs/ai-leads
+
+# Código fuente
+src/                            @utm-dev-labs/developers
