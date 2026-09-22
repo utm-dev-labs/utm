@@ -194,6 +194,76 @@ jobs:
           echo "🎉 Validación de PR completada exitosamente."
 
   # ===========================================================================
+  # Job: Enforce Flow — valida el flujo de PRs entre ramas
+  # ===========================================================================
+  enforce-flow:
+    name: Enforce Flow (flujo de ramas)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar flujo de merge entre ramas
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          echo "Validando flujo de PR: $HEAD_REF -> $BASE_REF"
+          echo ""
+
+          case "$BASE_REF" in
+            main)
+              if [ "$HEAD_REF" != "staging" ] && ! echo "$HEAD_REF" | grep -qE '^hotfix/'; then
+                echo "ERROR: No se permite hacer PR a 'main' desde '$HEAD_REF'."
+                echo ""
+                echo "Flujo permitido hacia main:"
+                echo "  - staging -> main (releases)"
+                echo "  - hotfix/* -> main (correcciones urgentes)"
+                echo ""
+                echo "Flujo correcto del proyecto:"
+                echo "  feat/*, fix/*, docs/*, chore/* -> dev -> staging -> main"
+                echo ""
+                echo "Si tu cambio no es un hotfix, primero haz PR a 'dev',"
+                echo "luego el admin promueve dev -> staging -> main."
+                exit 1
+              fi
+              echo "Flujo valido hacia main desde '$HEAD_REF'."
+              ;;
+            staging)
+              if [ "$HEAD_REF" != "dev" ]; then
+                echo "ERROR: Solo la rama 'dev' puede hacer PR a 'staging'."
+                echo ""
+                echo "Flujo permitido hacia staging:"
+                echo "  - dev -> staging"
+                echo ""
+                echo "Tu rama '$HEAD_REF' debe ir primero a 'dev'."
+                echo "Luego el admin crea el PR de dev -> staging."
+                exit 1
+              fi
+              echo "Flujo valido hacia staging desde 'dev'."
+              ;;
+            dev)
+              if ! echo "$HEAD_REF" | grep -qE '^(feat|fix|docs|chore)/'; then
+                echo "ERROR: Solo ramas feat/*, fix/*, docs/*, chore/* pueden hacer PR a 'dev'."
+                echo ""
+                echo "Flujo permitido hacia dev:"
+                echo "  - feat/*  -> dev (nuevas funcionalidades)"
+                echo "  - fix/*   -> dev (correcciones de bugs)"
+                echo "  - docs/*  -> dev (documentacion)"
+                echo "  - chore/* -> dev (mantenimiento)"
+                echo ""
+                echo "Renombra tu rama con el prefijo correcto."
+                echo "Ejemplo: feat/mi-feature, fix/corregir-login"
+                exit 1
+              fi
+              echo "Flujo valido hacia dev desde '$HEAD_REF'."
+              ;;
+            *)
+              echo "Rama base '$BASE_REF' no tiene restricciones de flujo configuradas."
+              ;;
+          esac
+
+          echo ""
+          echo "Validacion de flujo completada exitosamente."
+
+  # ===========================================================================
   # Job: Verificar tests — advierte si hay cambios en src/ sin tests
   # ===========================================================================
   check-tests:

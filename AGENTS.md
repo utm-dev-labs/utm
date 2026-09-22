@@ -149,3 +149,12 @@ Incluir co-author cuando el agente genera el commit.
 - Antes de implementar lógica de negocio, revisar docs/business-rules/
 - Si no existe documentación de la regla, documentarla PRIMERO en docs/business-rules/ y luego implementar
 - Cambios a reglas de negocio existentes requieren confirmación explícita del usuario
+
+## BMAD — Board de Ideas
+
+- Las ideas del equipo estan en `bmad/`
+- Flujo: `brainstorm/` → `maduracion/` → `analisis/` → `desarrollo/`
+- Cualquier miembro puede continuar una idea donde otro la dejo
+- Al implementar codigo relacionado a una idea BMAD, referenciar el archivo
+- Al crear un issue desde una idea BMAD, mover el archivo a `desarrollo/` y agregar el link del issue
+- Ideas completadas o rechazadas van a `bmad/archivo/`
