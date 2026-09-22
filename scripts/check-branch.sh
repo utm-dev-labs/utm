@@ -4,8 +4,8 @@
 
 RAMA_ACTUAL=$(git branch --show-current)
 
-# ─── Bloquear si estamos en main o staging ───
-if [ "$RAMA_ACTUAL" = "main" ] || [ "$RAMA_ACTUAL" = "staging" ]; then
+# ─── Bloquear si estamos en main ───
+if [ "$RAMA_ACTUAL" = "main" ]; then
   echo ""
   echo "❌ ERROR: Estás en la rama '$RAMA_ACTUAL'."
   echo ""

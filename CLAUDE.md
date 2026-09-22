@@ -56,13 +56,21 @@ supabase/
 | Rama | Propósito | Despliega a |
 |------|-----------|-------------|
 | `main` | Producción estable | Producción |
-| `staging` | Pre-producción, QA | Staging |
 | `dev` | Desarrollo activo | Dev |
 | `feat/<nombre>` | Features nuevas | — |
 | `fix/<nombre>` | Correcciones | — |
 | `hotfix/<nombre>` | Fixes urgentes a prod | — |
 
-**Flujo**: `feat/*` → `dev` → `staging` → `main`
+**Flujo**: `feat/*` → `dev` → `main`
+
+## Rebase — OBLIGATORIO
+
+- SIEMPRE usar rebase, NUNCA merge commits
+- Antes de crear PR: `git fetch origin dev && git rebase origin/dev`
+- Si hay conflictos: resolver commit por commit durante el rebase
+- Para actualizar rama: `git pull --rebase origin dev`
+- PROHIBIDO: `git merge`, `git pull` (sin --rebase)
+- El historial debe ser LINEAL — GitHub bloqueará merge commits
 
 ## Commits
 
@@ -96,7 +104,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **SIEMPRE** crear una nueva migración para cambios
 - Nombrar con timestamp: `YYYYMMDDHHMMSS_descripcion.sql`
 - Incluir `-- UP` y `-- DOWN` en cada migración
-- Probar en local antes de aplicar a staging/producción
+- Probar en local antes de aplicar a producción
 
 ## Testing
 
@@ -138,7 +146,7 @@ Toda PR debe incluir:
 ## Reglas de ramas y rebase
 
 - La rama local de trabajo SIEMPRE debe partir de `dev`
-- NUNCA hacer push directo a `main` o `staging`
+- NUNCA hacer push directo a `main`
 - NUNCA hacer merge commits — siempre usar rebase
 - Antes de crear un PR, hacer `git fetch origin dev && git rebase origin/dev`
 - Si hay conflictos en rebase, resolverlos manualmente commit por commit

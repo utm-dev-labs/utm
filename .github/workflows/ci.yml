@@ -1,6 +1,6 @@
 # =============================================================================
 # CI Pipeline — UTM Dev Labs
-# Se ejecuta en cada Pull Request hacia dev, staging y main.
+# Se ejecuta en cada Pull Request hacia dev y main.
 # Valida código: lint, tests y build.
 # =============================================================================
 
@@ -8,7 +8,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [dev, staging, main]
+    branches: [dev, main]
 
 # Cancela ejecuciones previas del mismo PR para ahorrar minutos
 concurrency:
@@ -155,31 +155,20 @@ jobs:
 
           case "$BASE_REF" in
             main)
-              # Solo staging y hotfix/* pueden ir a main
-              if [ "$BRANCH_TYPE" != "hotfix" ] && [ "$HEAD_REF" != "staging" ]; then
+              # Solo dev y hotfix/* pueden ir a main
+              if [ "$HEAD_REF" != "dev" ] && [ "$BRANCH_TYPE" != "hotfix" ]; then
                 echo ""
                 echo "❌ ERROR: No se permite hacer PR directo a 'main' desde '$HEAD_REF'."
                 echo ""
                 echo "📖 Flujo correcto:"
-                echo "   • feature/fix/docs/chore branches → dev"
-                echo "   • dev → staging"
-                echo "   • staging → main"
+                echo "   • feat/*, fix/*, docs/*, chore/* → dev"
+                echo "   • dev → main (solo admin)"
                 echo "   • hotfix/* → main (solo para urgencias)"
                 echo ""
                 echo "   Tu rama debería ir a 'dev', no a 'main'."
                 exit 1
               fi
               echo "✅ Flujo válido hacia main."
-              ;;
-            staging)
-              # Solo dev puede ir a staging
-              if [ "$HEAD_REF" != "dev" ]; then
-                echo ""
-                echo "❌ ERROR: Solo la rama 'dev' puede hacer PR a 'staging'."
-                echo "   Tu rama '$HEAD_REF' debería ir a 'dev' primero."
-                exit 1
-              fi
-              echo "✅ Flujo válido hacia staging."
               ;;
             dev)
               # Feature branches van a dev — ya validamos el prefijo arriba
@@ -210,34 +199,21 @@ jobs:
 
           case "$BASE_REF" in
             main)
-              if [ "$HEAD_REF" != "staging" ] && ! echo "$HEAD_REF" | grep -qE '^hotfix/'; then
+              if [ "$HEAD_REF" != "dev" ] && ! echo "$HEAD_REF" | grep -qE '^hotfix/'; then
                 echo "ERROR: No se permite hacer PR a 'main' desde '$HEAD_REF'."
                 echo ""
                 echo "Flujo permitido hacia main:"
-                echo "  - staging -> main (releases)"
+                echo "  - dev -> main (solo admin)"
                 echo "  - hotfix/* -> main (correcciones urgentes)"
                 echo ""
                 echo "Flujo correcto del proyecto:"
-                echo "  feat/*, fix/*, docs/*, chore/* -> dev -> staging -> main"
+                echo "  feat/*, fix/*, docs/*, chore/* -> dev -> main"
                 echo ""
                 echo "Si tu cambio no es un hotfix, primero haz PR a 'dev',"
-                echo "luego el admin promueve dev -> staging -> main."
+                echo "luego el admin promueve dev -> main."
                 exit 1
               fi
               echo "Flujo valido hacia main desde '$HEAD_REF'."
-              ;;
-            staging)
-              if [ "$HEAD_REF" != "dev" ]; then
-                echo "ERROR: Solo la rama 'dev' puede hacer PR a 'staging'."
-                echo ""
-                echo "Flujo permitido hacia staging:"
-                echo "  - dev -> staging"
-                echo ""
-                echo "Tu rama '$HEAD_REF' debe ir primero a 'dev'."
-                echo "Luego el admin crea el PR de dev -> staging."
-                exit 1
-              fi
-              echo "Flujo valido hacia staging desde 'dev'."
               ;;
             dev)
               if ! echo "$HEAD_REF" | grep -qE '^(feat|fix|docs|chore)/'; then

@@ -52,11 +52,18 @@ supabase/functions/  → edge functions
 
 ### Branching
 - main = producción
-- staging = pre-producción / QA
 - dev = desarrollo activo
 - Ramas feature: feat/<nombre>
 - Ramas fix: fix/<nombre>
-- Flujo: feat/* → dev → staging → main
+- Flujo: feat/* → dev → main
+
+### Rebase — OBLIGATORIO
+- SIEMPRE usar rebase, NUNCA merge commits
+- Antes de crear PR: `git fetch origin dev && git rebase origin/dev`
+- Si hay conflictos: resolver commit por commit durante el rebase
+- Para actualizar rama: `git pull --rebase origin dev`
+- PROHIBIDO: `git merge`, `git pull` (sin --rebase)
+- El historial debe ser LINEAL — GitHub bloqueará merge commits
 
 ### Commits
 Conventional commits en español:
@@ -71,7 +78,7 @@ Incluir co-author cuando el agente genera el commit.
 - PROHIBIDO modificar migraciones existentes
 - Crear nueva migración con timestamp: YYYYMMDDHHMMSS_descripcion.sql
 - Incluir UP y DOWN
-- Probar en entorno local antes de aplicar a staging/producción
+- Probar en entorno local antes de aplicar a producción
 - PEDIR CONFIRMACIÓN antes de ejecutar migraciones
 
 ## Testing
@@ -109,7 +116,7 @@ Incluir co-author cuando el agente genera el commit.
 ## Reglas de ramas y rebase
 
 - La rama local de trabajo SIEMPRE debe partir de `dev`
-- NUNCA hacer push directo a main o staging
+- NUNCA hacer push directo a main
 - NUNCA hacer merge commits — siempre usar rebase
 - Antes de crear un PR: `git fetch origin dev && git rebase origin/dev`
 - Conflictos en rebase: resolver manualmente commit por commit

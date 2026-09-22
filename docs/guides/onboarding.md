@@ -22,11 +22,12 @@ cd utm
 
 ## 3. Flujo de trabajo
 
-1. Sincronizar con `main`: `git pull origin main`
-2. Crear rama: `git checkout -b tipo/descripcion` (ej: `feature/login`, `fix/validacion-email`)
+1. Sincronizar con `dev`: `git pull --rebase origin dev`
+2. Crear rama: `git checkout -b tipo/descripcion` (ej: `feat/login`, `fix/validacion-email`)
 3. Hacer commits pequenos y descriptivos
-4. Push y abrir Pull Request
-5. Esperar review antes de mergear
+4. Rebase antes de push: `git fetch origin dev && git rebase origin/dev`
+5. Push y abrir Pull Request hacia `dev`
+6. Esperar review antes de mergear
 
 ### Convenciones de commits
 

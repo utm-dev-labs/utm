@@ -9,7 +9,7 @@ Esta carpeta contendra:
 - **ADRs (Architecture Decision Records):** Registro de decisiones tecnicas importantes.
 - **Diagramas:** Diagramas de componentes, secuencia, despliegue, etc.
 - **Stack tecnologico:** Descripcion del stack elegido y justificacion.
-- **Infraestructura:** Configuracion de ambientes (dev, staging, produccion).
+- **Infraestructura:** Configuracion de ambientes (dev, produccion).
 
 ## Formato de ADR
 

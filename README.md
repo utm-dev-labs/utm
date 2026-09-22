@@ -34,10 +34,11 @@ cd utm
 
 ## Desarrollo
 
-1. Crear una rama desde `main`: `git checkout -b feature/mi-feature`
+1. Crear una rama desde `dev`: `git checkout dev && git checkout -b feat/mi-feature`
 2. Desarrollar y hacer commits descriptivos
-3. Abrir un Pull Request hacia `main`
-4. Esperar review y aprobacion
+3. Rebase antes de push: `git fetch origin dev && git rebase origin/dev`
+4. Abrir un Pull Request hacia `dev`
+5. Esperar review y aprobacion
 
 Para mas detalle, ver la [guia de onboarding](docs/guides/onboarding.md).
 

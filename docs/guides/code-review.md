@@ -131,9 +131,8 @@ nit: Falta un punto y coma en la linea 42.
 
 | Destino     | Aprobaciones minimas | Quien puede aprobar         |
 |-------------|----------------------|-----------------------------|
-| → `dev`     | 1                    | Cualquier miembro del equipo |
-| → `staging` | 1                    | Lead o reviewer senior       |
-| → `main`    | 2                    | Lead + al menos 1 mas        |
+| → `dev`     | 0                    | Cualquier miembro del equipo |
+| → `main`    | 1                    | Admin (canulcua123-source)   |
 
 ---
 

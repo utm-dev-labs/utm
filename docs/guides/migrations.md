@@ -6,7 +6,7 @@ Reglas y proceso para gestionar migraciones de base de datos en UTM Dev Labs.
 
 ### 1. NUNCA modificar migraciones ya aplicadas
 
-Una migracion que ya se ejecuto en cualquier ambiente (dev, staging o produccion) es **inmutable**. Si necesitas corregir algo, crea una nueva migracion.
+Una migracion que ya se ejecuto en cualquier ambiente (dev o produccion) es **inmutable**. Si necesitas corregir algo, crea una nueva migracion.
 
 Modificar una migracion aplicada causa:
 - Inconsistencia entre ambientes
@@ -72,11 +72,6 @@ Toda migracion debe tener su seccion DOWN para rollback.
 ### En desarrollo
 Ejecutar la seccion DOWN de la migracion y eliminar el archivo si es necesario.
 
-### En staging
-1. Ejecutar rollback de la migracion
-2. Verificar integridad de datos
-3. Comunicar al equipo
-
 ### En produccion
 1. **Requiere aprobacion** del lider tecnico
 2. Crear backup antes de ejecutar
@@ -91,11 +86,6 @@ Ejecutar la seccion DOWN de la migracion y eliminar el archivo si es necesario.
 - Libertad para crear y probar migraciones
 - Base de datos local o de desarrollo compartida
 - Se pueden resetear datos sin restriccion
-
-### Staging
-- Migraciones deben estar aprobadas en PR
-- Datos pueden ser sinteticos o anonimizados de produccion
-- Probar rollback antes de ir a produccion
 
 ### Produccion
 - **Solo migraciones mergeadas a main**

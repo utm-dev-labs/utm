@@ -164,15 +164,16 @@ Ver la guia completa en [`docs/guides/code-review.md`](docs/guides/code-review.m
 ### Reglas
 
 - **Solo mergea a `dev`** despues de al menos 1 aprobacion.
-- Usa **Squash and Merge** para mantener el historial limpio.
+- Usa **Rebase and Merge** para mantener el historial lineal.
 - **Elimina la rama** despues de mergear (GitHub lo ofrece automaticamente).
-- **Nunca** hagas push directo a `main` o `dev`.
+- **Nunca** hagas push directo a `main`.
+- **Siempre** haz rebase antes de push: `git fetch origin dev && git rebase origin/dev`
 
 ### Pasos
 
 1. Verifica que tu PR tiene al menos 1 aprobacion.
 2. Verifica que no hay conflictos. Si los hay, resuelvelos primero.
-3. Haz clic en **"Squash and merge"**.
+3. Haz clic en **"Rebase and merge"**.
 4. Elimina la rama remota.
 5. En tu maquina local:
 

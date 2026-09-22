@@ -9,27 +9,15 @@ Configurar manualmente en GitHub: Settings → Branches → Branch protection ru
 | Regla | Valor |
 |---|---|
 | Require a pull request before merging | Si |
-| Required approving reviews | 1 mínimo (recomendado 2) |
+| Required approving reviews | 1 mínimo |
 | Dismiss stale pull request approvals | Si |
 | Require status checks to pass (CI) | Si |
 | Require branches to be up to date | Si |
 | Require conversation resolution | Si |
+| Require linear history | Si |
 | Do not allow force pushes | Si |
 | Do not allow deletions | Si |
 | Restrict who can push (solo via PR) | Si |
-
----
-
-## `staging` (pre-producción)
-
-| Regla | Valor |
-|---|---|
-| Require a pull request before merging | Si (desde dev) |
-| Required approving reviews | 1 mínimo |
-| Require status checks to pass (CI) | Si |
-| Require branches to be up to date | Si |
-| Do not allow force pushes | Si |
-| Do not allow deletions | Si |
 
 ---
 
@@ -39,6 +27,7 @@ Configurar manualmente en GitHub: Settings → Branches → Branch protection ru
 |---|---|
 | Require status checks to pass (CI) | Si |
 | Require branches to be up to date | Si |
+| Require linear history | Si |
 | Do not allow force pushes | Si |
 | Do not allow deletions | Si |
 
@@ -47,7 +36,7 @@ Configurar manualmente en GitHub: Settings → Branches → Branch protection ru
 ## Flujo de ramas
 
 ```
-feature/* → dev → staging → main
+feature/* → dev → main
 hotfix/*  → main (con PR y aprobación)
 ```
 

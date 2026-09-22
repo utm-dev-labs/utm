@@ -2,7 +2,7 @@
 
 ## Resumen
 
-El proyecto usa un flujo de ramas con tres ambientes: **dev**, **staging** y **main** (produccion).
+El proyecto usa un flujo de ramas con dos ambientes: **dev** (desarrollo) y **main** (produccion).
 Solo el admin (`canulcua123-source`) puede aprobar merges a `main`.
 
 ---
@@ -12,15 +12,26 @@ Solo el admin (`canulcua123-source`) puede aprobar merges a `main`.
 ```
   feat/mi-feature ──┐
   fix/bug-login ────┤
-  docs/readme ──────┼──> dev ──────> staging ──────> main
-  chore/deps ───────┘     ^            ^               ^
-                          |            |               |
-                     CI pasa      QA aqui         Solo admin
-                     merge libre  admin promueve   aprueba y mergea
+  docs/readme ──────┼──> dev ──────> main
+  chore/deps ───────┘     ^           ^
+                          |           |
+                     CI pasa     Solo admin
+                     merge libre aprueba y mergea
 
-  hotfix/urgente ──────────────────────────────────────┘
+  hotfix/urgente ─────────────────────┘
                     (directo a main, solo urgencias)
 ```
+
+---
+
+## Rebase — OBLIGATORIO
+
+- SIEMPRE usar rebase, NUNCA merge commits
+- Antes de crear PR: `git fetch origin dev && git rebase origin/dev`
+- Si hay conflictos: resolver commit por commit durante el rebase
+- Para actualizar rama: `git pull --rebase origin dev`
+- PROHIBIDO: `git merge`, `git pull` (sin --rebase)
+- El historial debe ser LINEAL — GitHub bloqueara merge commits
 
 ---
 
@@ -44,7 +55,7 @@ git commit -m "feat: descripcion del cambio"
 ### 3. Rebase antes de push
 
 ```bash
-git pull --rebase origin dev
+git fetch origin dev && git rebase origin/dev
 ```
 
 ### 4. Push y crear PR hacia dev
@@ -59,14 +70,9 @@ Luego crear el Pull Request en GitHub apuntando a `dev`.
 
 El CI (lint, tests, build) debe pasar. Una vez verde, se mergea.
 
-### 6. Promocion a staging (solo admin)
+### 6. Promocion a main (solo admin)
 
-Periodicamente, el admin crea un PR de `dev` hacia `staging`.
-Aqui se hace QA (pruebas de calidad).
-
-### 7. Promocion a main (solo admin)
-
-Cuando staging esta estable, el admin crea un PR de `staging` hacia `main`.
+Cuando dev esta estable, el admin crea un PR de `dev` hacia `main`.
 Este es el unico camino a produccion (excepto hotfixes).
 
 ---
@@ -94,9 +100,7 @@ Crear PR directo a `main`. Solo para emergencias.
 | Crear ramas feat/fix/docs/chore | Si              | Si                         |
 | PR hacia dev                    | Si              | Si                         |
 | Aprobar/mergear PR en dev       | Si              | Si                         |
-| PR de dev hacia staging         | No              | Si                         |
-| Aprobar/mergear PR en staging   | No              | Si                         |
-| PR de staging hacia main        | No              | Si                         |
+| PR de dev hacia main            | No              | Si                         |
 | Aprobar/mergear PR en main      | No              | Si                         |
 | Crear hotfix/* hacia main       | Si (crear PR)   | Si (aprobar y mergear)     |
 | Force push                      | No (bloqueado)  | No (bloqueado)             |
@@ -118,8 +122,7 @@ Crear PR directo a `main`. Solo para emergencias.
 
 ## Reglas de proteccion de ramas
 
-| Rama    | CI requerido | PR requerido | Aprobaciones | Restriccion de push       |
-|---------|:------------:|:------------:|:------------:|---------------------------|
-| main    | Si           | Si           | 1            | Solo admin                |
-| staging | Si           | Si           | 1            | Abierto (solo desde dev)  |
-| dev     | Si           | No           | 0            | Abierto                   |
+| Rama    | CI requerido | PR requerido | Aprobaciones | Linear history | Restriccion de push |
+|---------|:------------:|:------------:|:------------:|:--------------:|---------------------|
+| main    | Si           | Si           | 1            | Si             | Solo admin          |
+| dev     | Si           | No           | 0            | Si             | Abierto             |

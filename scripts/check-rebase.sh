@@ -4,8 +4,8 @@
 
 RAMA_ACTUAL=$(git branch --show-current)
 
-# Saltar verificación para dev, main y staging
-if [ "$RAMA_ACTUAL" = "dev" ] || [ "$RAMA_ACTUAL" = "main" ] || [ "$RAMA_ACTUAL" = "staging" ]; then
+# Saltar verificación para dev y main
+if [ "$RAMA_ACTUAL" = "dev" ] || [ "$RAMA_ACTUAL" = "main" ]; then
   exit 0
 fi
 
