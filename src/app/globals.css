@@ -1,0 +1,29 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+:root {
+  --background: 40 20% 98%;
+  --foreground: 20 14% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14% 10%;
+  --primary: 153 42% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 29 49% 64%;
+  --secondary-foreground: 20 14% 10%;
+  --muted: 30 16% 93%;
+  --muted-foreground: 25 6% 49%;
+  --accent: 30 16% 93%;
+  --accent-foreground: 20 14% 10%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 30 10% 87%;
+  --input: 30 10% 87%;
+  --ring: 153 42% 30%;
+  --radius: 0.5rem;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
