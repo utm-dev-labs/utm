@@ -14,6 +14,7 @@
 | Lenguaje | TypeScript | 5.x | Tipado estricto en todo el proyecto |
 | Base de datos | Supabase | Cloud | PostgreSQL 15, Auth, Storage |
 | ORM / Client | @supabase/supabase-js | 2.x | Queries, Auth, Realtime |
+| PWA | @serwist/next | latest | Progressive Web App, instalable, cache |
 
 ### Frontend
 | Libreria | Proposito |
@@ -49,6 +50,19 @@
 | Prettier | Formateo |
 | Husky | Git hooks (pre-commit) |
 | lint-staged | Lint solo archivos modificados |
+
+### PWA (Progressive Web App)
+| Herramienta | Proposito |
+|-------------|-----------|
+| @serwist/next | Service Worker + cache de assets |
+| manifest.json | Metadatos de la app (nombre, iconos, colores) |
+| next-pwa icons | Iconos 192x192 y 512x512 |
+
+PuntoFlor es PWA obligatoriamente. Esto permite:
+- Instalacion en tablet del mostrador o celular del vendedor
+- Cache de assets para carga rapida
+- Funcionalidad basica offline (catalogo) en V1.1
+- Push notifications para estados de pedido en V2
 
 ### Deploy
 | Servicio | Proposito |
