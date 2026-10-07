@@ -25,19 +25,90 @@ PuntoFlor es un sistema interno para florerias que conecta la venta con el inven
 
 Mantener trazabilidad y control operativo: saber que flor entro, de donde vino, cuanto costo, cuanto queda, cuanto esta apartado, cuanto se consumio y en que pedido o servicio se utilizo.
 
-## Stack tecnologico
+## Stack tecnologico (OBLIGATORIO)
 
-| Capa | Tecnologia | Proposito |
-|------|-----------|-----------|
-| Frontend | **Next.js 14** (App Router) | UI, SSR, routing |
-| Lenguaje | **TypeScript** | Tipado estatico |
-| Backend | **Next.js API Routes** | Logica de negocio |
-| Base de datos | **Supabase** (PostgreSQL) | DB, Auth, RPCs |
-| ORM/Queries | **Supabase JS Client** | Acceso a datos |
-| Testing | **Vitest** | Tests unitarios e integracion |
-| Linter | **ESLint + Prettier** | Calidad de codigo |
-| Deploy | **Vercel** + Supabase Cloud | Hosting |
-| CI/CD | **GitHub Actions** | Automatizacion |
+> **REGLA**: Este es el stack oficial del proyecto. No se permite agregar ni sustituir tecnologias sin aprobacion del equipo. Toda contribucion debe usar estas herramientas.
+
+### Core
+
+| Capa | Tecnologia | Version | Proposito | Obligatorio |
+|------|-----------|---------|-----------|:-----------:|
+| Framework | **Next.js** | 14.x | App Router, SSR, API Routes | SI |
+| Lenguaje | **TypeScript** | 5.x | Tipado estricto en todo el proyecto | SI |
+| Base de datos | **Supabase** | Cloud | PostgreSQL 15, Auth, RPCs | SI |
+| DB Client | **@supabase/supabase-js** | 2.x | Queries, Auth, Realtime | SI |
+| PWA | **@serwist/next** | latest | Progressive Web App | SI |
+
+### Frontend
+
+| Libreria | Proposito | Obligatorio |
+|----------|-----------|:-----------:|
+| **React 18** | UI components | SI |
+| **Tailwind CSS** | Estilos utilitarios | SI |
+| **shadcn/ui** | Componentes base (tablas, forms, botones, modals) | SI |
+| **React Hook Form** | Manejo de formularios | SI |
+| **Zod** | Validacion de schemas (client + server) | SI |
+| **Lucide React** | Iconos | SI |
+| **date-fns** | Manejo de fechas | SI |
+
+### Backend
+
+| Herramienta | Proposito | Obligatorio |
+|-------------|-----------|:-----------:|
+| **Next.js API Routes** | Endpoints REST | SI |
+| **plpgsql** (Supabase) | RPCs atomicas de inventario | SI |
+| **Supabase Auth** | Autenticacion (email/password) | SI |
+| **Zod** | Validacion de payloads en servidor | SI |
+
+### Testing y calidad
+
+| Herramienta | Proposito | Obligatorio |
+|-------------|-----------|:-----------:|
+| **Vitest** | Tests unitarios e integracion | SI |
+| **@testing-library/react** | Tests de componentes | SI |
+| **ESLint** | Linting | SI |
+| **Prettier** | Formateo | SI |
+| **Husky + lint-staged** | Git hooks pre-commit | SI |
+
+### Deploy e infraestructura
+
+| Servicio | Proposito | Obligatorio |
+|----------|-----------|:-----------:|
+| **Vercel** | Frontend + API Routes | SI |
+| **Supabase Cloud** | PostgreSQL + Auth + RPCs | SI |
+| **GitHub Actions** | CI: lint, tests, build | SI |
+
+### PWA — Progressive Web App
+
+PuntoFlor es una **PWA** (Progressive Web App). Esto significa que:
+
+- Se puede **instalar** en celular o tablet como app nativa (sin App Store)
+- Funciona en **cualquier navegador** moderno (Chrome, Safari, Firefox)
+- Tiene **Service Worker** para cache de assets y carga rapida
+- En V1.1: soporte **offline basico** (catalogo y pedidos pendientes de sync)
+- En V2: **push notifications** para cambios de estado de pedidos
+
+**Configuracion**: Se usa `@serwist/next` integrado con Next.js. El manifest y Service Worker se configuran en `next.config.js`.
+
+**Requerimientos PWA**:
+- `manifest.json` con nombre, iconos y colores del tema
+- Service Worker registrado para cache de assets estaticos
+- Meta tags de PWA en `layout.tsx`
+- Iconos en multiples resoluciones (192x192, 512x512)
+- `theme-color` consistente con la marca PuntoFlor
+
+### Reglas del stack
+
+1. **No instalar librerias sin justificacion** — si shadcn/ui o las herramientas listadas ya resuelven el problema, no agregar otra dependencia
+2. **TypeScript strict mode** obligatorio — no usar `any`, no desactivar checks
+3. **Zod para toda validacion** — en formularios (client) y en API Routes (server)
+4. **No logica de negocio en componentes React** — toda logica va en `src/services/`
+5. **RPCs atomicas para inventario** — reserva, consumo, merma y lotes se operan via plpgsql, nunca desde el frontend
+6. **API Routes para backend** — no llamar Supabase directamente desde componentes para operaciones de escritura
+7. **Tailwind + shadcn/ui para UI** — no CSS modules, no styled-components, no CSS-in-JS
+8. **Conventional Commits en espanol** — `feat(auth): agregar login con Supabase`
+9. **Tests obligatorios** — toda logica de negocio debe tener tests antes del merge
+10. **PWA compatible** — toda pagina debe funcionar correctamente como PWA instalada
 
 ## Requisitos
 
@@ -45,6 +116,7 @@ Mantener trazabilidad y control operativo: saber que flor entro, de donde vino, 
 - npm 9+
 - Git 2.30+
 - Cuenta de Supabase (gratuita)
+- Navegador moderno (Chrome 90+, Safari 15+, Firefox 90+)
 
 ## Instalacion
 
