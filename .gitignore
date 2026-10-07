@@ -90,3 +90,8 @@ docker-compose.override.yml
 .netlify/
 tmp/
 temp/
+
+*storybook.log
+storybook-static
+storybook-static
+app-pkg.json

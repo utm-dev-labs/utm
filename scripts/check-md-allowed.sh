@@ -8,9 +8,12 @@ PERMITIDOS_RAIZ="README.md CONTRIBUTING.md CLAUDE.md AGENTS.md codex.md CHANGELO
 BLOQUEADOS=0
 REPORTE=""
 
-for ARCHIVO in "$@"; do
-  # Permitir cualquier .md dentro de docs/
-  if echo "$ARCHIVO" | grep -qE "^docs/"; then
+for ARCHIVO_RAW in "$@"; do
+  # Convertir ruta absoluta a relativa si es necesario
+  ARCHIVO=$(echo "$ARCHIVO_RAW" | sed "s|$(pwd)/||")
+
+  # Permitir cualquier .md dentro de docs/ o bmad/
+  if echo "$ARCHIVO" | grep -qE "^(docs/|bmad/)"; then
     continue
   fi
 
